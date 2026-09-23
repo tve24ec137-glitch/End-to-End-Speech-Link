@@ -26,6 +26,7 @@ Run the provided Stage 0 analysis script from your terminal:
 python stage_0.py
 
 Expected Outputs
+
 1.Console Output: 
 The script will print the file's sample rate, duration, and compute the Crest Factor (Peak-to-RMS ratio) in both linear and dB scales.
 
