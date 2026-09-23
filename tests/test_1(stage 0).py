@@ -4,7 +4,7 @@ from scipy.io import wavfile
 
 # 1. Load the Audio File
 # Make sure your file is named 'voice.wav' and is in the same directory
-sample_rate, data = wavfile.read('voice.wav')
+sample_rate, data = wavfile.read('audio_1.wav')
 
 # Convert to Mono if the recording is Stereo
 if len(data.shape) > 1:
