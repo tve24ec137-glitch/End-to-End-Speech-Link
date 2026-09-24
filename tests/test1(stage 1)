@@ -1,0 +1,59 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.io import wavfile
+from scipy.signal import butter, filtfilt
+from scipy.interpolate import interp1d
+
+# 1. Load the original 44.1 kHz audio
+fs_old, data_old = wavfile.read('voice.wav')
+if len(data_old.shape) > 1:
+    data_old = data_old.mean(axis=1) # Convert stereo to mono if needed
+data_old = data_old.astype(np.float64)
+
+# Define time arrays for sampling conversion
+t_old = np.arange(len(data_old)) / fs_old
+fs_new = 8000
+num_new_samples = int(len(data_old) * fs_new / fs_old)
+t_new = np.arange(num_new_samples) / fs_new
+
+# 2. Path A: Deliberate Aliasing (No Filter)
+# Directly sample the 44.1 kHz signal at 8 kHz. Any frequency above 4 kHz will alias.
+interpolator = interp1d(t_old, data_old, kind='linear', bounds_error=False, fill_value=0)
+data_aliased = interpolator(t_new)
+
+# 3. Path B: Correct Anti-Aliasing & Sampling
+# Design an Order-8 Butterworth low-pass filter with a 3.4 kHz cut-off
+cutoff = 3400.0
+nyquist = fs_old / 2.0
+b, a = butter(8, cutoff / nyquist, btype='low')
+data_filtered = filtfilt(b, a, data_old)
+
+# Sample the properly filtered signal at 8 kHz
+interpolator_filtered = interp1d(t_old, data_filtered, kind='linear', bounds_error=False, fill_value=0)
+data_clean = interpolator_filtered(t_new)
+
+# 4. Save both files for the listening test
+def save_wav(filename, rate, data):
+    # Normalize to 16-bit PCM range to prevent clipping
+    data_norm = np.int16((data / np.max(np.abs(data))) * 32767)
+    wavfile.write(filename, rate, data_norm)
+
+save_wav('voice_8k_aliased.wav', fs_new, data_aliased)
+save_wav('voice_8k_clean.wav', fs_new, data_clean)
+
+# 5. Plotting Side-by-Side Spectrograms
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
+
+# Spectrogram of Aliased Signal
+Pxx1, freqs1, bins1, im1 = ax1.specgram(data_aliased, Fs=fs_new, NFFT=256, cmap='viridis')
+ax1.set_title('Aliased Spectrum (No Filter)')
+ax1.set_xlabel('Time [s]')
+ax1.set_ylabel('Frequency [Hz]')
+
+# Spectrogram of Clean Signal
+Pxx2, freqs2, bins2, im2 = ax2.specgram(data_clean, Fs=fs_new, NFFT=256, cmap='viridis')
+ax2.set_title('Clean Spectrum (Order-8 Butterworth LPF at 3.4 kHz)')
+ax2.set_xlabel('Time [s]')
+
+fig.colorbar(im2, ax=[ax1, ax2], label='Intensity [dB]')
+plt.show()
