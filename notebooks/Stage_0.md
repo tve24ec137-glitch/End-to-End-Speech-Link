@@ -27,9 +27,11 @@ In Stage 0, we recorded an uncompressed 11.99-second mono speech sample at a 48 
 * **Crest Factor (Linear):** 8.51
 * **Crest Factor (dB):** 18.59 dB
 
+**Crest Factor** is the **Peak-to-RMS ratio** of a signal, which measures how extreme a signal's loudest spikes are compared to its average (RMS) power:
 
-* **Significance:** The Crest Factor measures the ratio between the absolute highest peak and the average (RMS) energy of the voice signal. A value of 18.59 dB shows that the peak amplitude is 8.51 times larger than the average voice level. Because a standard uniform quantizer has to stretch its step sizes to cover those rare +28,000 peaks, the quieter parts of the speech get very few quantization levels. This 18.59 dB figure is our exact mathematical justification for adding mu-law companding in Stage 2 to compress the peaks before quantization.
+$$\text{CF}_{\text{linear}} = \frac{A_{\text{peak}}}{A_{\text{rms}}} \quad \text{and} \quad \text{CF}_{\text{dB}} = 20 \log_{10}\left(\frac{A_{\text{peak}}}{A_{\text{rms}}}\right)$$
 
+In Stage 0 waveform, brief consonant bursts spike all the way up to **~28,000**, while the majority of your voice vibrations sit much lower (below **5,000**) alongside silent pauses. Because the peaks are **8.51 times** larger than the average level, your speech is "spiky" and has a high crest factor of **18.59 dB**—unlike a continuous, full-scale sine wave, which has a low crest factor of $\sqrt{2} \approx 1.414$ (**3.01 dB**).
 
 
 ---
