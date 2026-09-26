@@ -20,7 +20,7 @@ In Stage 0, we recorded an uncompressed 11.99-second mono speech sample at a 48 
 **3. Crest Factor (Peak-to-RMS Ratio)**
 
 * **Measured Values:**
-* **Sampling Rate:** 48,000 Hz
+* **Sampling Rate:** 44,100 Hz
 * **Duration:** 11.99 seconds
 
 
