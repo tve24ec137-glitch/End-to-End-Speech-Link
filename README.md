@@ -85,3 +85,35 @@ In the Figure 3 (SQNR vs Bit Depth), the measured uniform speech SQNR (red line)
    Figure 4 (Histograms) demonstrates the mechanical effect of the µ-law algorithm. The original speech histogram shows the vast majority of samples clustered tightly around the zero amplitude mark. After logarithmic compression, the distribution is pushed outward, spreading the data efficiently to form a bimodal distribution. Consequently, the blue µ-law curve in Figure 3 recovers significant performance, cleanly overtaking the uniform quantization curve. At the standard 8-bit depth, $\mu$-law companded audio achieves a noticeably higher SQNR than uniform audio.
 * **Auditory Results:**
    Listening to the generated 8-bit .wav files directly confirms the mathematical plots. voice_8bit_uniform.wav suffers from noticeable quantization noise—a gritty background static—especially during quiet fade-outs and pauses, because those low-level segments toggle very few quantization steps. Conversely, voice_8bit_mulaw.wav preserves the quiet sections smoothly and sounds drastically clearer, audibly validating the SQNR improvement achieved through non-uniform bit allocation.
+
+
+
+**Stage 3: Digital Modulation and AWGN Channel Transmission**
+
+**1. Objective and Methodology**
+
+The objective of this stage was to transition the verified 8-bit µ-law PCM audio into a digital baseband transmission format. The audio integers were serialized into a binary bitstream using Most Significant Bit (MSB) first ordering. This bitstream was then Gray-mapped into complex constellation symbols for BPSK, QPSK, and 16-QAM modulation schemes. Before simulating physical transmission, a zero-noise loopback test was executed to ensure the modulator and demodulator logic functioned as perfect mathematical inverses, successfully verifying that the reconstructed bitstream and WAV array were 100% bit-identical to the input. Following this baseline validation, the symbols were passed through an Additive White Gaussian Noise (AWGN) channel across a sweep of E_b/N_0 values to calculate Bit Error Rates (BER) and evaluate channel performance.
+
+**2. Theoretical Basics Applied**
+
+In digital modulation, binary data is mapped onto the phase and amplitude of a carrier signal. BPSK transmits 1 bit per symbol by alternating phase by 180 degrees. QPSK transmits 2 bits per symbol by utilizing four orthogonal phase states, effectively doubling the data rate of BPSK within the same bandwidth without requiring additional power per bit. 16-QAM further increases spectral efficiency to 4 bits per symbol by modulating both amplitude and phase.However, as the number of constellation points increases within a fixed normalized power envelope, the physical distance between adjacent symbols decreases. In an AWGN channel, thermal noise scatters the precise symbol coordinates into randomized distributions. When noise variance pushes a received symbol across a decision boundary into an adjacent region, a bit error occurs. Consequently, higher-order modulation schemes like 16-QAM require significantly higher signal power (E_b/N_0) to maintain the same BER as QPSK or BPSK.
+
+**3. Observations and Results**
+
+The performance of the digital modulators over the AWGN channel was verified mathematically via BER waterfall curves, visually through constellation scatter plots, and auditorily by transmitting the actual audio bitstream.
+
+![Alternative descriptive text](figures/stage_3_1.png)
+
+* **Mathematical BER Verification:**
+   Figure 5 (BER vs E_b/N_0) confirms the theoretical operation of the transmitters and receivers. The simulated markers for BPSK (red dots) and QPSK (blue crosses) align perfectly with the theoretical BPSK/QPSK curve (solid black line). This validates the principle that QPSK achieves the same error performance as BPSK relative to energy per bit. Furthermore, the 16-QAM simulation (green triangles) tracks its theoretical curve (dashed black line) accurately, demonstrating the expected ~4 dB performance shift required to support the denser constellation.
+
+* **Visualizing Channel Noise:**
+  ![Alternative descriptive text](figures/stage_3_2.png)
+
+  Figure 6 (Constellations at E_b/N_0 = 10 dB) illustrates the physical mechanism of bit errors. In the BPSK and QPSK plots, the noise clouds are tightly clustered within their respective quadrants, maintaining substantial margin from the axes (decision boundaries). In the 16-QAM plot, the sixteen distinct symbol clouds are densely packed, and the noise variance causes the edges of the clusters to encroach upon the decision boundaries, visually confirming why 16-QAM exhibits a higher BER at this specific E_b/N_0 level.
+
+* **Auditory Verification:**
+  The mathematical BER results were directly confirmed by transmitting the actual 8-bit µ-law audio bitstream through the AWGN channel using QPSK modulation at varying noise levels.
+  *At **12** dB, the measured BER was effectively zero, yielding a reconstructed audio file that sounded completely identical to the clean, pre-transmission signal.
+  *At **6** dB, the BER increased to approximately 10^-3. The recovered audio remained intelligible, but distinct digital artifacts—characterized by sharp, random pops and clicks—became noticeable, demonstrating the auditory onset of channel degradation.
+  *At **2** dB, the BER degraded significantly to approximately 4%. The digital errors manifested as an aggressive, robotic static storm that severely corrupted the audio, rendering quieter speech segments entirely unintelligible and confirming the total breakdown of the communication link at low signal-to-noise ratios.
