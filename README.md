@@ -2,7 +2,7 @@
 End-to-End Speech LinkCourse Project: Analog & Digital Communication
 
 Team Members
-Vysakh P Chandran (69)Ujjwal Skandakumar P (68)Rohann Subhash (55)
+Vysakh P Chandran (69),Ujjwal Skandakumar P (68),Rohann Subhash (55)
 
 Project Overview:
 This project investigates the cumulative degradation of an analog speech signal as it passes through a complete digital communication pipeline. By capturing an analog voice recording and processing it through anti-aliasing, sampling, quantization, companding, modulation, and a noisy AWGN channel, we analyze where signal quality drops the most. The goal is to determine at what noise levels the audio becomes unintelligible, bridging mathematical bit-error rates with perceived human speech quality.
