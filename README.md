@@ -146,3 +146,27 @@ The implementation of the pulse-shaped channel was verified through exact varian
   *Spectrum Confinement:* The Power Spectral Density plot (Figure 7) visually confirms the success of the RRC pulse shaping. The transmission energy (blue curve) remains flat across the center frequency band before initiating a smooth roll-off as it crosses the Nyquist bandwidth edge at $\pm 0.500$ Hz (black dotted lines).
   
   *Absolute Bandwidth Limit:* Most importantly, the signal plunges sharply to the noise floor exactly at the absolute bandwidth limits of $\pm 0.675$ Hz (red dashed lines). This aligns perfectly with the theoretical calculation of $(1 + 0.35) \times 1.0 \text{ Hz} / 2 = \pm 0.675 \text{ Hz}$, proving that 100% of the signal energy is strictly contained within the required telecommunications bandwidth limit.
+
+
+
+**Stage 5: Receiver Matched Filtering and BER Verification**
+
+**1. Objective and Methodology**
+The objective of this stage was to simulate the complete physical layer receiver pipeline. The continuous-time analog waveforms generated in Stage 4, heavily corrupted by AWGN, were processed by a Matched Filter at the receiver. This filter—an identical Root-Raised Cosine (RRC) response—maximized the signal-to-noise ratio at the decision points while perfectly satisfying the Nyquist zero-ISI criterion. Following the matched filter, the continuous waveform was downsampled precisely at the symbol rate (compensating for the total combined delay of the TX and RX filters) to extract discrete symbol coordinates. Finally, decision boundaries were applied to demap the symbols back into binary data to calculate the Bit Error Rate (BER).
+
+**2. Theoretical Basics Applied**
+In a bandwidth-limited channel utilizing RRC pulse shaping, the transmitted pulses smear into one another, creating massive Inter-Symbol Interference (ISI) in the raw waveform. By passing the received signal through an identical RRC matched filter, the combined system response becomes a full Raised Cosine filter. At the exact optimum sampling instants (multiples of $T_s$), the tails of all adjacent symbols pass strictly through zero, completely eliminating ISI.Once properly sampled, the discrete coordinates can be compared mathematically against probability theory. The theoretical BER for BPSK and Gray-coded QPSK is identically determined by the Q-function, represented as $Q(\sqrt{2E_b/N_0})$ or precisely $0.5 \times \text{erfc}(\sqrt{E_b/N_0})$. Because 16-QAM requires amplitude scaling to maintain normalized power, its theoretical BER follows a denser probability expression: $\frac{3}{8}\text{erfc}(\sqrt{0.4 E_b/N_0})$.
+
+**3. Observations and Results**
+The end-to-end pipeline was validated mathematically via BER curves and visually via constellation distributions after matched filtering and downsampling.
+* **Mathematical BER Verification:**
+      ![Alternative descriptive text](figures/stage_5.png)
+  Figure 8 demonstrates the performance of the full pulse-shaped physical layer compared to theoretical mathematical curves. While the simulated BPSK and QPSK markers follow the general shape of the solid theoretical $Q(\sqrt{2E_b/N_0})$ baseline, they begin to visibly diverge and exhibit a higher Bit Error Rate at $E_b/N_0$ levels above 5 dB. The 16-QAM simulation similarly tracks above its theoretical dashed erfc curve across the entire simulated range, showing a noticeable performance penalty. This gap between theory and simulation at higher signal-to-noise ratios indicates the presence of residual Inter-Symbol Interference (ISI), which is a common practical artifact caused by filter truncation lengths or minor symbol-timing synchronization offsets in the sampling array.
+
+* **Visualizing Channel Clarification:**
+   The constellation scatter plots demonstrate the recovered symbol coordinates at critical $E_b/N_0$ thresholds
+        ![Alternative descriptive text](figures/stage_5-2.png)
+  * 4 dB (High Noise): The BPSK and QPSK clouds are heavily dispersed, causing significant overlap across the decision boundaries. The 16-QAM symbols have merged into a single indistinguishable block of noise, making individual amplitude and phase states impossible to resolve.
+  * 8 dB (Moderate Noise): BPSK and QPSK resolve into clearly defined halves and quadrants, respectively, resulting in a rapidly improving BER. The 16-QAM constellation begins to show regional separation but still suffers from heavy noise overlap between adjacent states.
+  * 14 dB (Low Noise): All three modulation schemes resolve into their expected 2, 4, and 16 distinct clusters. However, rather than condensing into pinpoint dots, the clusters maintain a visible degree of spread and variance. This visual variance at a high $E_b/N_0$ physically corroborates the residual ISI and elevated error rate observed in the BER waterfall curves.
+
