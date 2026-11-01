@@ -117,3 +117,32 @@ The performance of the digital modulators over the AWGN channel was verified mat
   *At **12** dB, the measured BER was effectively zero, yielding a reconstructed audio file that sounded completely identical to the clean, pre-transmission signal.
   *At **6** dB, the BER increased to approximately 10^-3. The recovered audio remained intelligible, but distinct digital artifacts—characterized by sharp, random pops and clicks—became noticeable, demonstrating the auditory onset of channel degradation.
   *At **2** dB, the BER degraded significantly to approximately 4%. The digital errors manifested as an aggressive, robotic static storm that severely corrupted the audio, rendering quieter speech segments entirely unintelligible and confirming the total breakdown of the communication link at low signal-to-noise ratios.
+
+
+
+**Stage 4: Pulse Shaping and the AWGN Channel**
+
+**1. Objective and Methodology**
+The objective of this stage was to transition the discrete, baseband QPSK symbols into continuous physical waveforms suitable for band-limited transmission. The symbol stream was oversampled by a factor of 8 (Samples Per Symbol) and convolved with a Root-Raised Cosine (RRC) filter using a roll-off factor of $\alpha = 0.35$. The shaped signal was then passed through an Additive White Gaussian Noise (AWGN) channel at a target $E_b/N_0$ of 10.0 dB. To validate the simulation framework, we explicitly measured the generated discrete noise variance to ensure it matched the theoretical continuous-time $E_b/N_0$ requirement, and we plotted the Power Spectral Density (PSD) to confirm the transmitted bandwidth.
+
+**2. Theoretical Basics Applied**
+In digital communications, transmitting raw, rectangular discrete symbols requires infinite bandwidth due to their broad Sinc-function spectral characteristics. To prevent adjacent channel interference, pulse shaping is employed. The RRC filter restricts the absolute bandwidth of the baseband signal to precisely $(1+\alpha)R_s$, where $R_s$ is the symbol rate and $\alpha$ is the roll-off factor. When combined with an identical matched filter at the receiver, the overall system achieves a full Raised Cosine response, which satisfies the Nyquist ISI criterion and results in zero Inter-Symbol Interference at the sampling instants.When simulating continuous-time channel noise in a discrete-time array, the variance of the generated noise must scale with the digital sampling rate ($F_s = SPS \times R_s$). Therefore, verifying that the physical array variance matches the theoretically calculated noise variance is a critical prerequisite to ensure the $E_b/N_0$ performance curves are mathematically valid.
+
+**3. Observations and Results**
+The implementation of the pulse-shaped channel was verified through exact variance measurement and spectral analysis.
+* **Variance Verification:**
+
+| Parameter | Value |
+| :--- | :--- |
+| **Target $E_b/N_0$** | 10.0 dB |
+| **Theoretical Variance** | 0.400000 |
+| **Actually Generated** | 0.399675 |
+| **Error Margin** | 0.0814% |
+
+  Channel Accuracy: The terminal output proves the AWGN simulation is strictly constrained to the mathematical requirements. For an $E_b/N_0$ of 10.0 dB at an oversampling rate of 8, the theoretical noise variance is exactly 0.400000. The numpy generated noise array yielded a variance of 0.399675, confirming an error margin of less than 0.1%. This validates the channel implementation.
+
+* **Bandwidth Verification:**
+    ![Alternative descriptive text](figures/stage_4.png)
+  *Spectrum Confinement:* The Power Spectral Density plot (Figure 7) visually confirms the success of the RRC pulse shaping. The transmission energy (blue curve) remains flat across the center frequency band before initiating a smooth roll-off as it crosses the Nyquist bandwidth edge at $\pm 0.500$ Hz (black dotted lines).
+  
+  *Absolute Bandwidth Limit:* Most importantly, the signal plunges sharply to the noise floor exactly at the absolute bandwidth limits of $\pm 0.675$ Hz (red dashed lines). This aligns perfectly with the theoretical calculation of $(1 + 0.35) \times 1.0 \text{ Hz} / 2 = \pm 0.675 \text{ Hz}$, proving that 100% of the signal energy is strictly contained within the required telecommunications bandwidth limit.
