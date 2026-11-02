@@ -160,7 +160,7 @@ In a bandwidth-limited channel utilizing RRC pulse shaping, the transmitted puls
 **3. Observations and Results**
 The end-to-end pipeline was validated mathematically via BER curves and visually via constellation distributions after matched filtering and downsampling.
 * **Mathematical BER Verification:**
-      ![Alternative descriptive text](figures/stage_5.png)
+      ![Alternative descriptive text](figures/stage_5_1.png)
   Figure 8 demonstrates the performance of the full pulse-shaped physical layer compared to theoretical mathematical curves. While the simulated BPSK and QPSK markers follow the general shape of the solid theoretical $Q(\sqrt{2E_b/N_0})$ baseline, they begin to visibly diverge and exhibit a higher Bit Error Rate at $E_b/N_0$ levels above 5 dB. The 16-QAM simulation similarly tracks above its theoretical dashed erfc curve across the entire simulated range, showing a noticeable performance penalty. This gap between theory and simulation at higher signal-to-noise ratios indicates the presence of residual Inter-Symbol Interference (ISI), which is a common practical artifact caused by filter truncation lengths or minor symbol-timing synchronization offsets in the sampling array.
 
 * **Visualizing Channel Clarification:**
